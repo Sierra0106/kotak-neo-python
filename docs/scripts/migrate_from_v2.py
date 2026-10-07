@@ -467,6 +467,25 @@ def main(argv: list[str] | None = None) -> int:
     for file in files:
         all_findings.extend(scan_file(file))
 
+    # Check active environment for ghost files from previous neo-api-client install
+    try:
+        import neo_api_client
+        pkg_dir = Path(neo_api_client.__file__).resolve().parent
+        if (pkg_dir / "NeoWebSocket.py").exists() or (pkg_dir / "HSWebSocketLib.py").exists():
+            all_findings.append(
+                Finding(
+                    pkg_dir / "NeoWebSocket.py",
+                    1,
+                    "warning",
+                    "Detected leftover files from legacy 'neo-api-client' in site-packages/neo_api_client/. "
+                    "This causes legacy callback WebSocket imports to target the decommissioned "
+                    "'wss://mlhsm.kotaksecurities.com' gateway. "
+                    "Fix: run 'pip uninstall neo-api-client kotakneoapi && pip install kotakneoapi'.",
+                )
+            )
+    except Exception:
+        pass
+
     if not all_findings:
         print("No known v2 -> kotakneoapi migration issues found.")
         return 0

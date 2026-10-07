@@ -77,3 +77,20 @@ __all__ = [
     "OrderError",
     "WebSocketError",
 ] + __all_feed__
+
+# Detect leftover ghost files from legacy neo-api-client (v2.0.2) installations
+import os as _os
+import warnings as _warnings
+
+_pkg_dir = _os.path.dirname(__file__)
+if _os.path.exists(_os.path.join(_pkg_dir, "NeoWebSocket.py")) or _os.path.exists(
+    _os.path.join(_pkg_dir, "HSWebSocketLib.py")
+):
+    _warnings.warn(
+        "Detected leftover legacy files (e.g. NeoWebSocket.py, HSWebSocketLib.py) in site-packages/neo_api_client/. "
+        "This occurs when 'kotakneoapi' is installed over 'neo-api-client' without uninstalling the legacy package first, "
+        "which can cause legacy socket calls to target the decommissioned 'wss://mlhsm.kotaksecurities.com' gateway. "
+        "Please run 'pip uninstall neo-api-client kotakneoapi && pip install kotakneoapi' to clean your environment.",
+        UserWarning,
+        stacklevel=2,
+    )
